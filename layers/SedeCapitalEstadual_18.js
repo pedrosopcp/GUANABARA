@@ -1,0 +1,1 @@
+var json_SedeCapitalEstadual_18 = {"type":"FeatureCollection","name":"SedeCapitalEstadual_18","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"OBJECTID":"1","nome":"Rio de Janeiro"},"geometry":{"type":"Point","coordinates":[-43.227875124999969,-22.876652117999981]}}]}
