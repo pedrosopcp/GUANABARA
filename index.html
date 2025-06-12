@@ -33,6 +33,9 @@
             background-color: rgba(255,255,255,.4) !important;
             padding: 2px !important;
         } 
+        </style>
+
+        <style>
         html, body, #map {
             width: 100%;
             height: 100%;
@@ -67,6 +70,27 @@
         }
         </style>
 
+
+	<style>
+#logos {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: row; /* agora as imagens estarão lado a lado */
+    gap: 10px;
+    z-index: 1000;
+}
+
+.logo {
+    height: 50px;
+    background-color: white;
+    padding: 10px;
+    border: 2px solid black;
+}
+</style>
+
+
         <title>RH V - Baía de Guanabara</title>
     </head>
 
@@ -76,6 +100,19 @@
                 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
                 <div id="popup-content"></div>
             </div>
+
+	<div id="logos">
+    <a href="https://profill.com.br/" target="_blank">
+        <img src="images/logo_cor_G.png" alt="Logo Profill" class="logo" />
+    </a>
+    <a href="https://comitebaiadeguanabara.org.br/" target="_blank">
+        <img src="images/logo_CBH_BG.png" alt="Logo CBH-BG" class="logo" />
+    </a>
+    <a href="https://www.agevap.org.br/" target="_blank">
+        <img src="images/logo_AGEVAP.png" alt="Logo AGEVAP" class="logo" />
+    </a>
+</div>
+
 
             <!-- Logo PIN adicionada -->
             <img src="images/pin.png" alt="Pin" id="pin-image" title="Adicionar Ponto">
@@ -100,6 +137,8 @@
         <script src="./resources/ol.js"></script>
         <script src="./resources/ol-layerswitcher.js"></script>
         <script src="resources/ol-geocoder.js"></script>
+        <script src="layers/MassaDgua_3.js"></script><script src="layers/EstadodoRiodeJaneiro_4.js"></script><script src="layers/LimiteMunicipal_5.js"></script><script src="layers/TrechodeDrenagemCBHIBGE_6.js"></script><script src="layers/UnidadesdeConservaoProteoIntegral_7.js"></script><script src="layers/AdutorasAtlasguas2021_8.js"></script><script src="layers/MonitdeQualidadedaguaCBH2025_9.js"></script><script src="layers/MonitdeQualidadedaguaINEA2022_10.js"></script><script src="layers/UsuriosCadastradosguaSuperficialINEA2021_11.js"></script><script src="layers/PontosdeCaptaoparaAbastecimentoUrbanoAtlasguas2021_12.js"></script><script src="layers/EstdeTratamentodeEsgotoETEsAtlasEsgotos20132019_13.js"></script><script src="layers/UnidadesdeTratamentoparaAbastecimentoPSAM2019_14.js"></script><script src="layers/FundoMscara_15.js"></script><script src="layers/SubComits_16.js"></script><script src="layers/SedeMunicipal_17.js"></script><script src="layers/SedeCapitalEstadual_18.js"></script>
+        <script src="styles/MassaDgua_3_style.js"></script><script src="styles/EstadodoRiodeJaneiro_4_style.js"></script><script src="styles/LimiteMunicipal_5_style.js"></script><script src="styles/TrechodeDrenagemCBHIBGE_6_style.js"></script><script src="styles/UnidadesdeConservaoProteoIntegral_7_style.js"></script><script src="styles/AdutorasAtlasguas2021_8_style.js"></script><script src="styles/MonitdeQualidadedaguaCBH2025_9_style.js"></script><script src="styles/MonitdeQualidadedaguaINEA2022_10_style.js"></script><script src="styles/UsuriosCadastradosguaSuperficialINEA2021_11_style.js"></script><script src="styles/PontosdeCaptaoparaAbastecimentoUrbanoAtlasguas2021_12_style.js"></script><script src="styles/EstdeTratamentodeEsgotoETEsAtlasEsgotos20132019_13_style.js"></script><script src="styles/UnidadesdeTratamentoparaAbastecimentoPSAM2019_14_style.js"></script><script src="styles/FundoMscara_15_style.js"></script><script src="styles/SubComits_16_style.js"></script><script src="styles/SedeMunicipal_17_style.js"></script><script src="styles/SedeCapitalEstadual_18_style.js"></script>
         <script src="layers/MassaDgua_3.js"></script>
         <script src="layers/EstadodoRiodeJaneiro_4.js"></script>
         <script src="layers/LimiteMunicipal_5.js"></script>
@@ -135,5 +174,8 @@
         <script src="./layers/layers.js" type="text/javascript"></script> 
         <script src="./resources/Autolinker.min.js"></script>
         <script src="./resources/qgis2web.js"></script>
+
+
+
     </body>
 </html>
