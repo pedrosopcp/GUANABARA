@@ -177,7 +177,7 @@ html, body {
 #bottom-panel-content h3 {
     font-size: 12px;
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     color: #ffffff;
 }
 
@@ -441,26 +441,26 @@ html, body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 50px;
+    height: 70px;
     background: #04456b;
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: Bahnschrift;
-    font-size: 12px;
+    font-size: 11px;
     z-index: 9999;
     font-weight: bold;
     text-align: center;
-    line-height: 1.3;
+    line-height: 1.5;
 }
 
 #map {
     position: absolute;
-    top: 50px;
+    top: 70px;
     left: 0;
     width: 100%;
-    height: calc(100vh - 40px);
+    height: calc(100vh - 70px);
 }
 .logo-link {
     position: fixed;
@@ -631,8 +631,8 @@ html, body {
 
     <body>
         <div class="header" id="app-header">
-    DEFINIÇÃO DE TRECHOS PRIORITÁRIOS COM VISTAS À ELABORAÇÃO DE FUTURA<br>
-    PROPOSTA DE ENQUADRAMENTO DE CORPOS HÍDRICOS NA RH-V
+    DEFINIÇÃO DE TRECHOS PRIORITÁRIOS COM VISTAS À ELABORAÇÃO<br>
+    DE FUTURAPROPOSTA DE ENQUADRAMENTO DE CORPOS HÍDRICOS NA RH-V
 </div>
 <!-- ================================
      LEGENDA LATERAL
@@ -946,6 +946,8 @@ locateControl.addTo(map);
         layer_GoogleSatellite_0;
         map.createPane('pane_GoogleMaps_0');
 map.getPane('pane_GoogleMaps_0').style.zIndex = 400;
+
+
 var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
     pane: 'pane_GoogleMaps_0',
     opacity: 1,
@@ -1294,59 +1296,7 @@ var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={
         bounds_group.addLayer(layer_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2);
         map.addLayer(layer_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2);
 
-        const url = {"Nominatim OSM": "https://nominatim.openstreetmap.org/search?format=geojson&addressdetails=1&",
-        "France BAN": "https://api-adresse.data.gouv.fr/search/?"}
-        var photonControl = L.control.photon({
-            url: url["Nominatim OSM"],
-            feedbackLabel: '',
-            position: 'topleft',
-            includePosition: true,
-            initial: true,
-            // resultsHandler: myHandler,
-        }).addTo(map);
-        photonControl._container.childNodes[0].style.borderRadius="10px"
-        // Create a variable to store the geoJSON data
-        var x = null;
-        // Create a variable to store the marker
-        var marker = null;
-        // Add an event listener to the Photon control to create a marker from the returned geoJSON data
-        var z = null;
-        photonControl.on('selected', function(e) {
-            console.log(photonControl.search.resultsContainer);
-            if (x != null) {
-                map.removeLayer(obj3.marker);
-                map.removeLayer(x);
-            }
-            obj2.gcd = e.choice;
-            x = L.geoJSON(obj2.gcd).addTo(map);
-            var label = typeof obj2.gcd.properties.label === 'undefined' ? obj2.gcd.properties.display_name : obj2.gcd.properties.label;
-            obj3.marker = L.marker(x.getLayers()[0].getLatLng()).bindPopup(label).addTo(map);
-            map.setView(x.getLayers()[0].getLatLng(), 17);
-            z = typeof e.choice.properties.label === 'undefined'? e.choice.properties.display_name : e.choice.properties.label;
-            console.log(e);
-            e.target.input.value = z;
-        });
-        var search = document.getElementsByClassName("leaflet-photon leaflet-control")[0];
-        search.classList.add("leaflet-control-search")
-        search.style.display = "flex";
-        search.style.backgroundColor="rgba(255,255,255,0.5)" 
-
-        // Create the new button element
-        var button = document.createElement("div");
-        button.id = "gcd-button-control";
-        button.className = "gcd-gl-btn fa fa-search search-button";
-
-        // Insert the button at the beginning of the search control
-        search.insertBefore(button, search.firstChild);
-        last = search.lastChild;
-        last.style.display = "none";
-        button.addEventListener("click", function (e) {
-            if (last.style.display === "none") {
-                last.style.display = "block";
-            } else {
-                last.style.display = "none";
-            }
-        });
+        
         function pop_ENQBG_P4_MASSA_DAGUA_SELECAO_3(feature, layer) {
             var popupContent = '<table>\
                     <tr>\
