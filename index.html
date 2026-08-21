@@ -1,0 +1,1807 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+        <style>
+            html, body, #map {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+}
+
+/* =========================================================
+   AJUSTE AUTOMÁTICO DO PAINEL À LARGURA DA TELA
+   ========================================================= */
+
+/* O conteúdo principal ocupa toda a largura disponível */
+html, body {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Evita que elementos ultrapassem a largura da tela */
+* {
+    box-sizing: border-box;
+}
+
+/* Container principal do painel */
+#dashboard,
+.dashboard,
+.dashboard-container,
+.panel-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Linhas e colunas do Dashboard */
+.row {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Colunas */
+[class*="col-"] {
+    max-width: 100%;
+}
+
+/* Gráficos */
+.js-plotly-plot,
+.plot-container,
+.plotly,
+.dash-graph {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Tabelas */
+.dash-table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto;
+}
+
+/* Componentes internos do Plotly */
+.js-plotly-plot .plotly,
+.js-plotly-plot .main-svg {
+    max-width: 100% !important;
+}
+
+/* =========================================================
+   TELAS MENORES
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .dashboard,
+    .dashboard-container,
+    .panel-content {
+        width: 100% !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .dashboard,
+    .dashboard-container,
+    .panel-content {
+        width: 100% !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    /* Faz os elementos ocuparem uma linha inteira */
+    [class*="col-"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+
+    /* Reduz espaçamentos excessivos */
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* =========================================================
+   GARANTE QUE O PAINEL INFERIOR NÃO CRIE BARRA LATERAL
+   ========================================================= */
+
+#painel-inferior,
+.painel-inferior,
+.bottom-panel,
+.bottom-dashboard {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden;
+}
+
+/* PAINEL INFERIOR */
+
+#bottom-panel {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 70vh;
+    background: rgba(5, 5, 5, 0.95);
+    z-index: 9997;
+    box-shadow: 0 -3px 12px rgba(0,0,0,0.30);
+    font-family: Arial, sans-serif;
+    transition: transform 0.35s ease;
+}
+
+/* Título do painel */
+#bottom-panel-title {
+    height: 8px;
+    background: #04456b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Conteúdo */
+#bottom-panel-content {
+    height: calc(100% - 40px);
+    padding: 15px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    font-size: 10px;
+    
+}
+
+#bottom-panel-content h3 {
+    font-size: 12px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+#bottom-panel-content p {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #ffffff;
+}
+
+/* ==================================================
+   DASHBOARD - ESTATÍSTICAS DE CLASSES POR PARÂMETRO
+   ================================================== */
+
+.dash-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+}
+
+.dash-header h3 {
+    font-size: 14px;
+    margin: 0;
+}
+
+.dash-subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 2px;
+}
+
+.dash-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.dash-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dash-filter-group label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.55);
+}
+
+.dash-filter-group select {
+    background: #151515;
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-family: Arial, sans-serif;
+    min-width: 140px;
+}
+
+.dash-filter-group select:focus {
+    outline: none;
+    border-color: #1492db;
+}
+
+.dash-btn {
+    background: #1492db;
+    color: #ffffff;
+    border: 1px solid #1492db;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    height: fit-content;
+}
+
+.dash-btn:hover {
+    background: #1492db;
+}
+
+.dash-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.dash-kpi-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-left: 3px solid #1492db;
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+.dash-kpi-card .dash-kpi-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 4px;
+}
+
+.dash-kpi-card .dash-kpi-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.dash-kpi-card .dash-kpi-value.small {
+    font-size: 14px;
+}
+
+.dash-charts {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.dash-chart-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.dash-chart-card h4 {
+    font-size: 11px;
+    margin: 0 0 8px 0;
+    color: rgba(255,255,255,0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dash-chart-card canvas {
+    max-height: 260px;
+}
+
+.dash-table-wrap h4 {
+    font-size: 11px;
+    margin: 0 0 8px 0;
+    color: rgba(255,255,255,0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dash-table-wrap h4 span {
+    color: rgba(255,255,255,0.45);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: normal;
+}
+
+.dash-table-scroll {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+}
+
+#dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    color: #ffffff;
+}
+
+#dash-table thead th {
+    position: sticky;
+    top: 0;
+    background: #1492db;
+    text-align: left;
+    padding: 7px 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    z-index: 1;
+}
+
+#dash-table tbody td {
+    padding: 6px 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+#dash-table tbody tr:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+.dash-class-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #111;
+}
+
+.dash-loading, .dash-empty {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    padding: 20px 0;
+    text-align: center;
+}
+
+@media (max-width: 760px) {
+    .dash-charts {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Botão abrir/fechar */
+#bottom-panel-toggle {
+    position: absolute;
+    top: -55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 130px;
+    height: 55px;
+    background: #04456b;
+    color: #ffffff;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.25);
+    
+}
+
+#bottom-panel-toggle i {
+    font-size: 16px;
+    margin-bottom: 3px;
+    
+}
+
+#bottom-panel-toggle::after {
+    content: "DASHBOARD\A ENQUADRAMENTO";
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: center;
+    font-family: Bahnschrift;
+}
+
+/* Painel fechado */
+#bottom-panel.closed {
+    transform: translateY(100%);
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: #04456b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Bahnschrift;
+    font-size: 12px;
+    z-index: 9999;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.3;
+}
+
+#map {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 40px);
+}
+.logo-link {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 9999;
+}
+
+.logo-link img {
+    height: 25px;
+    display: block;
+}
+
+/* Aba da Legenda*/
+
+#legend-panel {
+    position: fixed;
+    top: 230px;
+    right: 0;
+    width: 250px;
+    max-height: calc(100vh - 75px);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: -3px 3px 12px rgba(0,0,0,0.30);
+    z-index: 9998;
+    font-family: Arial, sans-serif;
+    border-radius: 8px 0 0 8px;
+    overflow: hidden;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    font-family: Bahnschrift;
+}
+
+/* legenda aberta */
+#legend-panel.open {
+    transform: translateX(0);
+}
+
+/* botão para abrir/fechar */
+#legend-toggle {
+    position: fixed;
+    top: 230px;
+    right: 0;
+    width: 38px;
+    height: 115px;
+    background: #04456b;
+    color: white;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.3);
+    transition: right 0.3s ease;
+    font-family: Bahnschrift;
+    
+    
+}
+
+/* Ícone */
+#legend-toggle i {
+    font-size: 18px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    
+    
+}
+
+/* Texto LEGENDA */
+#legend-toggle::after {
+    content: "LEGENDA";
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    font-family: Bahnschrift;
+}
+
+/* botão quando legenda está aberta */
+#legend-toggle.open {
+    right: 255px;
+}
+
+/* título */
+.legend-title {
+    background: #04456b;
+    color: white;
+    padding: 12px 15px;
+    font-size: 10px;
+    font-weight: bold;
+    
+}
+
+/* conteúdo */
+.legend-content {
+    padding: 12px 15px;
+    overflow-y: auto;
+    max-height: calc(100vh - 125px);
+    
+}
+
+/* cada camada */
+.legend-layer {
+    margin-bottom: 18px;
+}
+
+/* nome da camada */
+.legend-layer-title {
+    font-weight: bold;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 8px;
+    
+}
+
+/* item da legenda */
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 6px 0;
+    font-size: 12px;
+    color: #444;
+    
+}
+
+/* símbolo quadrado */
+.legend-symbol-polygon {
+    width: 22px;
+    height: 15px;
+    margin-right: 8px;
+    border: 1px solid #333;
+    flex-shrink: 0;
+}
+
+/* símbolo de linha */
+.legend-symbol-line {
+    width: 25px;
+    height: 0;
+    border-top: 3px solid;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* símbolo de ponto */
+.legend-symbol-point {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin: 0 13px 0 5px;
+    border: 2px solid #000000;
+    flex-shrink: 0;
+}
+
+/* separador */
+.legend-separator {
+    border-top: 1px solid #ddd;
+    margin: 12px 0;
+}
+
+
+</style>
+
+        <title></title>
+    </head>
+
+    <body>
+        <div class="header" id="app-header">
+    DEFINIÇÃO DE TRECHOS PRIORITÁRIOS COM VISTAS À ELABORAÇÃO DE FUTURA<br>
+    PROPOSTA DE ENQUADRAMENTO DE CORPOS HÍDRICOS NA RH-V
+</div>
+<!-- ================================
+     LEGENDA LATERAL
+     ================================ -->
+
+<div id="legend-toggle" title="Mostrar legenda">
+    <i class="fas fa-list"></i>
+</div>
+
+<div id="legend-panel">
+
+    <div class="legend-title">
+       
+    </div>
+
+    <div class="legend-content">
+
+        <!-- PROPRIEDADES VISITADAS -->
+        <div class="legend-layer">
+
+            <div class="legend-layer-title">
+                Propriedades Visitadas
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-symbol-polygon"
+                      style="background: rgba(1,255,31,0.5);">
+                </span>
+                Concluído
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-symbol-polygon"
+                      style="background: rgba(255,221,1,0.5);">
+                </span>
+                Não concluído
+            </div>
+
+        </div>
+
+        <div class="legend-separator"></div>
+
+        <!-- LINHA DE TRANSMISSÃO -->
+        <div class="legend-layer">
+
+            <div class="legend-layer-title">
+                LT 525kV Capivari Sul - Guaíba 3
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-symbol-line"
+                      style="border-color: rgba(255,150,0,1);">
+                </span>
+                Linha de transmissão 525 kV
+            </div>
+
+        </div>
+
+        <div class="legend-separator"></div>
+
+        <!-- SUBESTAÇÕES -->
+        <div class="legend-layer">
+
+            <div class="legend-layer-title">
+                Subestações
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-symbol-point"
+                      style="background: rgba(255,239,17,1);">
+                </span>
+                Subestação
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ========================================
+     PAINEL INFERIOR
+     ======================================== -->
+
+<div id="bottom-panel" class="closed
+">
+
+    <div id="bottom-panel-toggle">
+        <i class="fas fa-chevron-up"></i>
+    </div>
+
+    <div id="bottom-panel-title">
+    
+    </div>
+
+    <div id="bottom-panel-content">
+
+        <div class="dash-header">
+            <div>
+                <h3>Dashboard &mdash; Estatística de Classes por Parâmetro</h3>
+                <div class="dash-subtitle">Enquadramento por parâmetro e classe final (P.80)</div>
+            </div>
+
+            <div class="dash-filters">
+                <div class="dash-filter-group">
+                    <label for="dash-filter-subcomite">Subcomitê</label>
+                    <select id="dash-filter-subcomite">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="dash-filter-group">
+                    <label for="dash-filter-regime">Regime</label>
+                    <select id="dash-filter-regime">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="dash-filter-group">
+                    <label for="dash-filter-salinidade">Salinidade</label>
+                    <select id="dash-filter-salinidade">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <button id="dash-filter-reset" class="dash-btn" type="button">Limpar filtros</button>
+            </div>
+        </div>
+
+        <div id="dash-kpis" class="dash-kpis">
+            <div class="dash-loading">Carregando estatísticas&hellip;</div>
+        </div>
+
+        <div class="dash-charts">
+            <div class="dash-chart-card">
+                <h4>Distribuição — Classe Final (P.80)</h4>
+                <canvas id="dash-chart-classe-final"></canvas>
+            </div>
+            <div class="dash-chart-card">
+                <h4>Cruzamento por Parâmetro de Qualidade</h4>
+                <canvas id="dash-chart-parametros"></canvas>
+            </div>
+        </div>
+
+        <div class="dash-table-wrap">
+            <h4>Pontos de monitoramento <span id="dash-table-count"></span></h4>
+            <div class="dash-table-scroll">
+                <table id="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Ponto</th>
+                            <th>Subcomitê</th>
+                            <th>Regime</th>
+                            <th>Salinidade</th>
+                            <th>Classe Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dash-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="map">
+
+    <a href="https://profill.com.br/" target="_blank" rel="noopener noreferrer" class="logo-link">
+    <img src="https://profill.com.br/wp-content/webp-express/webp-images/uploads/2024/08/branco-3.png.webp" alt="Profill">
+</a>
+</div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/ENQBG_P5_SUBBACIA_PRIORIDADE_1.js"></script>
+        <script src="data/ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2.js"></script>
+        <script src="data/ENQBG_P4_MASSA_DAGUA_SELECAO_3.js"></script>
+        <script src="data/ENQBG_P4_SUBCOMITE_4.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-23.184918880832445,-43.576228779451796],[-22.2615430094743,-42.49157446561783]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/qgis2web/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // modify popup if contains media
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (imgTd) {
+                var src = imgTd.getAttribute('src');
+                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                    popup._contentNode.classList.add('media');
+                    var img = popup._contentNode.querySelector('td img');
+                    if (img) {
+                        // If already loaded (cache), update immediately
+                        if (img.complete && img.naturalHeight > 0) {
+                            popup.update();
+                        } else {
+                            img.addEventListener('load', function() {
+                                popup.update();
+                            });
+                            img.addEventListener('error', function() {
+                                popup.update();
+                            });
+                        }
+                    }
+                } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
+                    var audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = src;
+                    imgTd.parentNode.replaceChild(audio, imgTd);
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
+                    var video = document.createElement('video');
+                    video.controls = true;
+                    video.src = src;
+                    video.style.width = "400px";
+                    video.style.height = "300px";
+                    video.style.maxHeight = "60vh";
+                    video.style.maxWidth = "60vw";
+                    imgTd.parentNode.replaceChild(video, imgTd);
+                    popup._contentNode.classList.add('media');
+                    // Aggiorna il popup quando il video carica i metadati
+                    video.addEventListener('loadedmetadata', function() {
+                        popup.update();
+                    });
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else {
+                    popup._contentNode.classList.remove('media');
+                }
+            } else {
+                popup._contentNode.classList.remove('media');
+            }
+        }
+        var zoomControl = L.control.zoom({
+    position: 'topleft'
+}).addTo(map);
+
+        var locateControl = L.control({position: 'topleft'});
+locateControl.onAdd = function(map) {
+    var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+    div.innerHTML = '<a href="#" title="Minha localização" role="button" aria-label="Minha localização" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;background:#fff;font-size:16px;"><i class="fas fa-crosshairs"></i></a>';
+    L.DomEvent.disableClickPropagation(div);
+    div.onclick = function(e) {
+        e.preventDefault();
+        if (!navigator.geolocation) {
+            alert('Geolocalização não suportada neste navegador.');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                map.setView([lat, lng], 18);
+                L.marker([lat, lng]).addTo(map).bindPopup('Você está aqui').openPopup();
+            },
+            function(error) {
+                alert('Não foi possível obter sua localização. Verifique se a permissão de localização está habilitada.');
+            },
+            { enableHighAccuracy: true }
+        );
+    };
+    return div;
+};
+locateControl.addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 0.8,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleSatellite_0;
+        map.createPane('pane_GoogleMaps_0');
+map.getPane('pane_GoogleMaps_0').style.zIndex = 400;
+var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    pane: 'pane_GoogleMaps_0',
+    opacity: 1,
+    attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+    minZoom: 1,
+    maxZoom: 28,
+    minNativeZoom: 0,
+    maxNativeZoom: 20
+});
+
+
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 0.7,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_ENQBG_P5_SUBBACIA_PRIORIDADE_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['COD_Sub'] !== null ? autolinker.link(String(feature.properties['COD_Sub']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nom_num'] !== null ? autolinker.link(String(feature.properties['nom_num']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['sub_bac'] !== null ? autolinker.link(String(feature.properties['sub_bac']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['p_bac_c'] !== null ? autolinker.link(String(feature.properties['p_bac_c']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['p_bac'] !== null ? autolinker.link(String(feature.properties['p_bac']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ENQBG_P5_SUBBACIA_PRIORIDADE_1_0(feature) {
+            if (feature.properties['p_bac'] >= 0.000000 && feature.properties['p_bac'] <= 3.067683 ) {
+                return {
+                pane: 'pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,0.7)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['p_bac'] >= 3.067683 && feature.properties['p_bac'] <= 6.057651 ) {
+                return {
+                pane: 'pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(245,144,83,0.7)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['p_bac'] >= 6.057651 && feature.properties['p_bac'] <= 9.047619 ) {
+                return {
+                pane: 'pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,223,154,0.7)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['p_bac'] >= 9.047619 && feature.properties['p_bac'] <= 12.037587 ) {
+                return {
+                pane: 'pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,240,158,0.7)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['p_bac'] >= 12.037587 && feature.properties['p_bac'] <= 15.027555 ) {
+                return {
+                pane: 'pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,204,98,0.7)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['p_bac'] >= 15.027555 && feature.properties['p_bac'] <= 19.000000 ) {
+                return {
+                pane: 'pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,0.7)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1');
+        map.getPane('pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1').style.zIndex = 401;
+        map.getPane('pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1').style['mix-blend-mode'] = 'normal';
+        var layer_ENQBG_P5_SUBBACIA_PRIORIDADE_1 = new L.geoJson(json_ENQBG_P5_SUBBACIA_PRIORIDADE_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+            layerName: 'layer_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+            pane: 'pane_ENQBG_P5_SUBBACIA_PRIORIDADE_1',
+            onEachFeature: pop_ENQBG_P5_SUBBACIA_PRIORIDADE_1,
+            style: style_ENQBG_P5_SUBBACIA_PRIORIDADE_1_0,
+        });
+        bounds_group.addLayer(layer_ENQBG_P5_SUBBACIA_PRIORIDADE_1);
+        map.addLayer(layer_ENQBG_P5_SUBBACIA_PRIORIDADE_1);
+        function pop_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['p3_id'] !== null ? autolinker.link(String(feature.properties['p3_id']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nome'] !== null ? autolinker.link(String(feature.properties['nome']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id_tr'] !== null ? autolinker.link(String(feature.properties['id_tr']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['p_trecho'] !== null ? autolinker.link(String(feature.properties['p_trecho']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['bac'] !== null ? autolinker.link(String(feature.properties['bac']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['p_bacia'] !== null ? autolinker.link(String(feature.properties['p_bacia']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['p_bacia_c'] !== null ? autolinker.link(String(feature.properties['p_bacia_c']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['sub'] !== null ? autolinker.link(String(feature.properties['sub']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['p_sub'] !== null ? autolinker.link(String(feature.properties['p_sub']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2_0(feature) {
+            switch(String(feature.properties['p_trecho'])) {
+                case 'Muito baixa':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Baixa':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Média':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Alta':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Muito alta':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        function style_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2_1(feature) {
+            switch(String(feature.properties['p_trecho'])) {
+                case 'Muito baixa':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(26,150,65,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Baixa':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(166,217,106,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Média':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(255,255,192,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Alta':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(253,174,97,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Muito alta':
+                    return {
+                pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+                opacity: 1,
+                color: 'rgba(215,25,28,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2');
+        map.getPane('pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2').style.zIndex = 402;
+        map.getPane('pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2').style['mix-blend-mode'] = 'normal';
+        var layer_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2 = new L.geoJson.multiStyle(json_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+            layerName: 'layer_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+            pane: 'pane_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2',
+            onEachFeature: pop_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2,
+            styles: [style_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2_0,style_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2_1,]
+        });
+        bounds_group.addLayer(layer_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2);
+        map.addLayer(layer_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2);
+
+        const url = {"Nominatim OSM": "https://nominatim.openstreetmap.org/search?format=geojson&addressdetails=1&",
+        "France BAN": "https://api-adresse.data.gouv.fr/search/?"}
+        var photonControl = L.control.photon({
+            url: url["Nominatim OSM"],
+            feedbackLabel: '',
+            position: 'topleft',
+            includePosition: true,
+            initial: true,
+            // resultsHandler: myHandler,
+        }).addTo(map);
+        photonControl._container.childNodes[0].style.borderRadius="10px"
+        // Create a variable to store the geoJSON data
+        var x = null;
+        // Create a variable to store the marker
+        var marker = null;
+        // Add an event listener to the Photon control to create a marker from the returned geoJSON data
+        var z = null;
+        photonControl.on('selected', function(e) {
+            console.log(photonControl.search.resultsContainer);
+            if (x != null) {
+                map.removeLayer(obj3.marker);
+                map.removeLayer(x);
+            }
+            obj2.gcd = e.choice;
+            x = L.geoJSON(obj2.gcd).addTo(map);
+            var label = typeof obj2.gcd.properties.label === 'undefined' ? obj2.gcd.properties.display_name : obj2.gcd.properties.label;
+            obj3.marker = L.marker(x.getLayers()[0].getLatLng()).bindPopup(label).addTo(map);
+            map.setView(x.getLayers()[0].getLatLng(), 17);
+            z = typeof e.choice.properties.label === 'undefined'? e.choice.properties.display_name : e.choice.properties.label;
+            console.log(e);
+            e.target.input.value = z;
+        });
+        var search = document.getElementsByClassName("leaflet-photon leaflet-control")[0];
+        search.classList.add("leaflet-control-search")
+        search.style.display = "flex";
+        search.style.backgroundColor="rgba(255,255,255,0.5)" 
+
+        // Create the new button element
+        var button = document.createElement("div");
+        button.id = "gcd-button-control";
+        button.className = "gcd-gl-btn fa fa-search search-button";
+
+        // Insert the button at the beginning of the search control
+        search.insertBefore(button, search.firstChild);
+        last = search.lastChild;
+        last.style.display = "none";
+        button.addEventListener("click", function (e) {
+            if (last.style.display === "none") {
+                last.style.display = "block";
+            } else {
+                last.style.display = "none";
+            }
+        });
+        function pop_ENQBG_P4_MASSA_DAGUA_SELECAO_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(String(feature.properties['OBJECTID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nome'] !== null ? autolinker.link(String(feature.properties['nome']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['sb_comit'] !== null ? autolinker.link(String(feature.properties['sb_comit']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Leng'] !== null ? autolinker.link(String(feature.properties['Shape_Leng']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area'] !== null ? autolinker.link(String(feature.properties['Shape_Area']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ENQBG_P4_MASSA_DAGUA_SELECAO_3_0() {
+            return {
+                pane: 'pane_ENQBG_P4_MASSA_DAGUA_SELECAO_3',
+                opacity: 1,
+                color: 'rgba(60,89,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,206,227,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ENQBG_P4_MASSA_DAGUA_SELECAO_3');
+        map.getPane('pane_ENQBG_P4_MASSA_DAGUA_SELECAO_3').style.zIndex = 403;
+        map.getPane('pane_ENQBG_P4_MASSA_DAGUA_SELECAO_3').style['mix-blend-mode'] = 'normal';
+        var layer_ENQBG_P4_MASSA_DAGUA_SELECAO_3 = new L.geoJson(json_ENQBG_P4_MASSA_DAGUA_SELECAO_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ENQBG_P4_MASSA_DAGUA_SELECAO_3',
+            layerName: 'layer_ENQBG_P4_MASSA_DAGUA_SELECAO_3',
+            pane: 'pane_ENQBG_P4_MASSA_DAGUA_SELECAO_3',
+            onEachFeature: pop_ENQBG_P4_MASSA_DAGUA_SELECAO_3,
+            style: style_ENQBG_P4_MASSA_DAGUA_SELECAO_3_0,
+        });
+        bounds_group.addLayer(layer_ENQBG_P4_MASSA_DAGUA_SELECAO_3);
+        map.addLayer(layer_ENQBG_P4_MASSA_DAGUA_SELECAO_3);
+        function pop_ENQBG_P4_SUBCOMITE_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Subcomitê'] !== null ? autolinker.link(String(feature.properties['Subcomitê']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['area_ha'] !== null ? autolinker.link(String(feature.properties['area_ha']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['area_km2'] !== null ? autolinker.link(String(feature.properties['area_km2']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ENQBG_P4_SUBCOMITE_4_0() {
+            return {
+                pane: 'pane_ENQBG_P4_SUBCOMITE_4',
+                opacity: 1,
+                color: 'rgba(125,1,202,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_ENQBG_P4_SUBCOMITE_4');
+        map.getPane('pane_ENQBG_P4_SUBCOMITE_4').style.zIndex = 404;
+        map.getPane('pane_ENQBG_P4_SUBCOMITE_4').style['mix-blend-mode'] = 'normal';
+        var layer_ENQBG_P4_SUBCOMITE_4 = new L.geoJson(json_ENQBG_P4_SUBCOMITE_4, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ENQBG_P4_SUBCOMITE_4',
+            layerName: 'layer_ENQBG_P4_SUBCOMITE_4',
+            pane: 'pane_ENQBG_P4_SUBCOMITE_4',
+            onEachFeature: pop_ENQBG_P4_SUBCOMITE_4,
+            style: style_ENQBG_P4_SUBCOMITE_4_0,
+        });
+        bounds_group.addLayer(layer_ENQBG_P4_SUBCOMITE_4);
+        map.addLayer(layer_ENQBG_P4_SUBCOMITE_4);
+       var baseMaps = {
+    "Google Satellite": layer_GoogleSatellite_0,
+    "Google Maps": layer_GoogleMaps_0
+};
+
+
+
+var overlayMaps = {
+    "Massa Dagua": layer_ENQBG_P4_MASSA_DAGUA_SELECAO_3,
+    "Subcomite": layer_ENQBG_P4_SUBCOMITE_4,
+    "Sub-bacias Prioridade": layer_ENQBG_P5_SUBBACIA_PRIORIDADE_1,
+    "Rede Trecho Prioridade": layer_ENQBG_P5_REDE_TRECHO_SELECAO_PRIORIDADE_v2_2
+    
+};
+
+L.control.layers(
+    baseMaps,
+    overlayMaps,
+    {
+        collapsed: true,
+        position: 'topright'
+        
+    }
+).addTo(map);
+      
+
+var legendToggle = document.getElementById('legend-toggle');
+var legendPanel = document.getElementById('legend-panel');
+
+legendToggle.addEventListener('click', function () {
+
+    legendPanel.classList.toggle('open');
+    legendToggle.classList.toggle('open');
+
+    if (legendPanel.classList.contains('open')) {
+
+        legendToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        legendToggle.title = 'Ocultar legenda';
+
+    } else {
+
+        legendToggle.innerHTML = '<i class="fas fa-list"></i>';
+        legendToggle.title = 'Mostrar legenda';
+
+    }
+
+}); 
+
+
+// ========================================
+// CONTROLE DO PAINEL INFERIOR
+// ========================================
+
+var bottomPanel = document.getElementById('bottom-panel');
+var bottomPanelToggle = document.getElementById('bottom-panel-toggle');
+
+bottomPanelToggle.addEventListener('click', function () {
+
+    bottomPanel.classList.toggle('closed');
+
+    if (bottomPanel.classList.contains('closed')) {
+
+        bottomPanelToggle.innerHTML =
+            '<i class="fas fa-chevron-up"></i>';
+
+    } else {
+
+        bottomPanelToggle.innerHTML =
+            '<i class="fas fa-chevron-down"></i>';
+
+    }
+
+});
+
+        </script>
+
+        <script>       
+       
+        // ========================================
+        // DASHBOARD - ESTATÍSTICA DE CLASSES
+        // ========================================
+        (function () {
+
+            var DATA_URL = 'data/estatistica_classes.json';
+
+            var PARAMETERS = [
+                { key: 'oxigenio_dissolvido', label: 'Oxigênio Dissolvido' },
+                { key: 'dbo', label: 'DBO' },
+                { key: 'nitrogenio_amoniacal', label: 'Nitrogênio Amoniacal' },
+                { key: 'nitrato', label: 'Nitrato' },
+                { key: 'fosforo_total', label: 'Fósforo Total' },
+                { key: 'coliformes_termotolerantes', label: 'Coliformes Termotolerantes' }
+            ];
+
+            var CLASS_ORDER = ['Classe 1', 'Classe 2', 'Classe 3', 'Ac. Classe 3', 'Classe 4', 'Ac. Classe 4', 'SLE', 'Não avaliado'];
+
+            var CLASS_COLORS = {
+                'Classe 1': '#018dff',
+                'Classe 2': '#1ed132',
+                'Classe 3': '#ffd901',
+                'Ac. Classe 3': '#ff7f00',
+                'Classe 4': '#ff3633',
+                'Ac. Classe 4': '#a12020',
+                'SLE': '#888888',
+                'Não avaliado': '#ffffff'
+            };
+
+            var allData = [];
+            var classeFinalChart = null;
+            var parametrosChart = null;
+
+            function normalizeClass(value) {
+                return value && value.trim() ? value.trim() : 'Não avaliado';
+            }
+
+            function uniqueSorted(arr) {
+                return Array.from(new Set(arr.filter(function (v) { return v && v.trim(); })))
+                    .sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+            }
+
+            function populateSelect(selectEl, values) {
+                values.forEach(function (v) {
+                    var opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    selectEl.appendChild(opt);
+                });
+            }
+
+            function getFilters() {
+                return {
+                    subcomite: document.getElementById('dash-filter-subcomite').value,
+                    regime: document.getElementById('dash-filter-regime').value,
+                    salinidade: document.getElementById('dash-filter-salinidade').value
+                };
+            }
+
+            function applyFilters() {
+                var f = getFilters();
+                return allData.filter(function (row) {
+                    if (f.subcomite && row.subcomite !== f.subcomite) return false;
+                    if (f.regime && row.regime !== f.regime) return false;
+                    if (f.salinidade && row.salinidade !== f.salinidade) return false;
+                    return true;
+                });
+            }
+
+            function renderKPIs(rows) {
+                var container = document.getElementById('dash-kpis');
+                var total = rows.length;
+
+                var counts = {};
+                rows.forEach(function (r) {
+                    var c = normalizeClass(r.classe_final);
+                    counts[c] = (counts[c] || 0) + 1;
+                });
+
+                var classe1Pct = total ? Math.round(100 * (counts['Classe 1'] || 0) / total) : 0;
+                var criticoPct = total ? Math.round(100 * ((counts['Classe 4'] || 0) + (counts['Ac. Classe 4'] || 0)) / total) : 0;
+
+                var predominante = '—';
+                var max = -1;
+                Object.keys(counts).forEach(function (k) {
+                    if (counts[k] > max) { max = counts[k]; predominante = k; }
+                });
+
+                var subcomites = uniqueSorted(rows.map(function (r) { return r.subcomite; })).length;
+
+                container.innerHTML =
+                    kpiCard('Pontos monitorados', total) +
+                    kpiCard('Subcomitês', subcomites) +
+                    kpiCard('Classe 1 (P.80)', classe1Pct + '%') +
+                    kpiCard('Classe 4 / crítico', criticoPct + '%') +
+                    kpiCard('Classe predominante', predominante, true);
+            }
+
+            function kpiCard(label, value, small) {
+                return '<div class="dash-kpi-card">' +
+                    '<div class="dash-kpi-label">' + label + '</div>' +
+                    '<div class="dash-kpi-value' + (small ? ' small' : '') + '">' + value + '</div>' +
+                    '</div>';
+            }
+
+            function countByClass(rows, key) {
+                var counts = {};
+                rows.forEach(function (r) {
+                    var c = normalizeClass(r[key]);
+                    counts[c] = (counts[c] || 0) + 1;
+                });
+                return counts;
+            }
+
+            function orderedClassesPresent(countsList) {
+                var present = {};
+                countsList.forEach(function (counts) {
+                    Object.keys(counts).forEach(function (k) { present[k] = true; });
+                });
+                return CLASS_ORDER.filter(function (c) { return present[c]; });
+            }
+
+            function renderClasseFinalChart(rows) {
+                var counts = countByClass(rows, 'classe_final');
+                var labels = orderedClassesPresent([counts]);
+                var data = labels.map(function (l) { return counts[l] || 0; });
+                var colors = labels.map(function (l) { return CLASS_COLORS[l]; });
+
+                var ctx = document.getElementById('dash-chart-classe-final').getContext('2d');
+                if (classeFinalChart) classeFinalChart.destroy();
+                classeFinalChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderColor: '#0d0d0d',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#ffffff', boxWidth: 12, font: { size: 10 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        var total = data.reduce(function (a, b) { return a + b; }, 0);
+                                        var pct = total ? Math.round(100 * ctx.raw / total) : 0;
+                                        return ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderParametrosChart(rows) {
+                var countsPerParam = PARAMETERS.map(function (p) { return countByClass(rows, p.key); });
+                var classes = orderedClassesPresent(countsPerParam);
+                var labels = PARAMETERS.map(function (p) { return p.label; });
+
+                var datasets = classes.map(function (c) {
+                    return {
+                        label: c,
+                        data: countsPerParam.map(function (counts) { return counts[c] || 0; }),
+                        backgroundColor: CLASS_COLORS[c]
+                    };
+                });
+
+                var ctx = document.getElementById('dash-chart-parametros').getContext('2d');
+                if (parametrosChart) parametrosChart.destroy();
+                parametrosChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: labels, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: { color: '#ffffff', font: { size: 10 } },
+                                grid: { color: 'rgba(255,255,255,0.08)' }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: { color: '#ffffff', font: { size: 10 } },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#ffffff', boxWidth: 12, font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderTable(rows) {
+                var body = document.getElementById('dash-table-body');
+                document.getElementById('dash-table-count').textContent = '(' + rows.length + ')';
+
+                if (!rows.length) {
+                    body.innerHTML = '<tr><td colspan="5" class="dash-empty">Nenhum ponto encontrado para os filtros selecionados.</td></tr>';
+                    return;
+                }
+
+                var sorted = rows.slice().sort(function (a, b) {
+                    return (a.ponto || '').localeCompare(b.ponto || '', 'pt-BR');
+                });
+
+                body.innerHTML = sorted.map(function (r) {
+                    var c = normalizeClass(r.classe_final);
+                    var color = CLASS_COLORS[c] || '#5a5a5';
+                    return '<tr>' +
+                        '<td>' + (r.ponto || '') + '</td>' +
+                        '<td>' + (r.subcomite_sigla || '') + '</td>' +
+                        '<td>' + (r.regime || '') + '</td>' +
+                        '<td>' + (r.salinidade || '') + '</td>' +
+                        '<td><span class="dash-class-badge" style="background:' + color + '">' + c + '</span></td>' +
+                        '</tr>';
+                }).join('');
+            }
+
+            function refreshDashboard() {
+                var rows = applyFilters();
+                renderKPIs(rows);
+                renderClasseFinalChart(rows);
+                renderParametrosChart(rows);
+                renderTable(rows);
+            }
+
+            function initFilters() {
+                populateSelect(document.getElementById('dash-filter-subcomite'), uniqueSorted(allData.map(function (r) { return r.subcomite; })));
+                populateSelect(document.getElementById('dash-filter-regime'), uniqueSorted(allData.map(function (r) { return r.regime; })));
+                populateSelect(document.getElementById('dash-filter-salinidade'), uniqueSorted(allData.map(function (r) { return r.salinidade; })));
+
+                ['dash-filter-subcomite', 'dash-filter-regime', 'dash-filter-salinidade'].forEach(function (id) {
+                    document.getElementById(id).addEventListener('change', refreshDashboard);
+                });
+
+                document.getElementById('dash-filter-reset').addEventListener('click', function () {
+                    document.getElementById('dash-filter-subcomite').value = '';
+                    document.getElementById('dash-filter-regime').value = '';
+                    document.getElementById('dash-filter-salinidade').value = '';
+                    refreshDashboard();
+                });
+            }
+
+            fetch(DATA_URL)
+                .then(function (resp) {
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    return resp.json();
+                })
+                .then(function (json) {
+                    allData = json;
+                    initFilters();
+                    refreshDashboard();
+                })
+                .catch(function (err) {
+                    document.getElementById('dash-kpis').innerHTML =
+                        '<div class="dash-empty">Não foi possível carregar "' + DATA_URL + '". Verifique se o arquivo está na pasta data/ do projeto.</div>';
+                    console.error('Erro ao carregar dados do dashboard:', err);
+                });
+
+        })();
+        
+        </script>
+        
+    </body>
+</html>
