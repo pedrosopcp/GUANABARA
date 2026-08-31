@@ -146,7 +146,7 @@ html, body {
     width: 100%;
     height: 70vh;
     background: rgba(5, 5, 5, 0.95);
-    z-index: 9997;
+    z-index: 99999;
     box-shadow: 0 -3px 12px rgba(0,0,0,0.30);
     font-family: Arial, sans-serif;
     transition: transform 0.35s ease;
@@ -400,7 +400,7 @@ html, body {
 #bottom-panel-toggle {
     position: absolute;
     top: -55px;
-    left: 50%;
+    left: 45%;
     transform: translateX(-50%);
     width: 130px;
     height: 55px;
@@ -431,6 +431,7 @@ html, body {
     font-family: Bahnschrift;
 }
 
+
 /* Painel fechado */
 #bottom-panel.closed {
     transform: translateY(100%);
@@ -438,7 +439,7 @@ html, body {
 
 .header {
     position: fixed;
-    top: 0;
+    top: 220;
     left: 0;
     width: 100%;
     height: 70px;
@@ -624,6 +625,78 @@ html, body {
 }
 
 
+/* Aba do Apêndice (painel de saneamento) — inferior, a 30% da lateral direita */
+
+#apendice-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 80vh;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 -3px 12px rgba(0,0,0,0.30);
+    z-index: 9999;
+    font-family: Bahnschrift;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+/* painel aberto */
+#apendice-panel.open {
+    transform: translateY(0);
+}
+
+
+/* botão para abrir/fechar */
+#apendice-tab {
+    position: fixed;
+    bottom: 0;
+    right: 35%; /* <-- ajuste este valor para mover o botão lateralmente */
+    width: 120px;
+    height: 55px;
+    background: #04456b;
+    color: white;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    z-index: 999999;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+    transition: bottom 0.3s ease;
+    font-family: Bahnschrift;
+}
+
+#apendice-tab i {
+    font-size: 18px;
+}
+
+#apendice-tab::after {
+    content: "APÊNDICE";
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 1px;
+    font-family: Bahnschrift;
+}
+
+/* botão quando o painel está aberto (sobe junto com a borda do painel) */
+#apendice-tab.open {
+    bottom: calc(80vh);
+}
+
+#apendice-panel iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
 </style>
 
         <title></title>
@@ -795,6 +868,18 @@ html, body {
 
 </div>
 
+
+<!-- ================================
+     ABA DO APÊNDICE (PAINEL SANEAMENTO)
+     ================================ -->
+
+<div id="apendice-tab" title="Mostrar apêndice" onclick="toggleApendice()">
+    <i class="fas fa-file-alt"></i>
+</div>
+
+<div id="apendice-panel">
+    <iframe id="apendice-iframe" src=""></iframe>
+</div>
 
 <div id="map">
 
@@ -1426,6 +1511,52 @@ L.control.layers(
 var legendToggle = document.getElementById('legend-toggle');
 var legendPanel = document.getElementById('legend-panel');
 
+// --- Empilhamento: painel aberto fica acima dos botões dos demais ---
+var PANEL_Z = 9998;       // z-index padrão do painel (definido no CSS)
+var TAB_Z = 9999;         // z-index padrão do botão (definido no CSS)
+var PANEL_Z_ACTIVE = 10001; // z-index do painel quando está em primeiro plano
+var TAB_Z_ACTIVE = 10002;   // z-index do botão quando está em primeiro plano
+
+var painelRegistry = []; // { panel: el, tab: el }
+
+function registerPainel(panelEl, tabEl) {
+    painelRegistry.push({ panel: panelEl, tab: tabEl });
+}
+
+function bringPainelToFront(panelEl, tabEl) {
+    painelRegistry.forEach(function (item) {
+        if (item.panel === panelEl) {
+            item.panel.style.zIndex = PANEL_Z_ACTIVE;
+            item.tab.style.zIndex = TAB_Z_ACTIVE;
+        } else {
+            item.panel.style.zIndex = PANEL_Z;
+            item.tab.style.zIndex = TAB_Z;
+        }
+    });
+}
+
+// --- Aba do Apêndice ---
+var apendiceLoaded = false;
+function toggleApendice() {
+    var panel = document.getElementById('apendice-panel');
+    var tab = document.getElementById('apendice-tab');
+    var iframe = document.getElementById('apendice-iframe');
+
+    if (!apendiceLoaded) {
+        iframe.src = 'apendice4-painel-saneamento.html';
+        apendiceLoaded = true;
+    }
+    panel.classList.toggle('open');
+    tab.classList.toggle('open');
+
+    if (panel.classList.contains('open')) {
+        bringPainelToFront(panel, tab);
+    }
+}
+
+registerPainel(document.getElementById('apendice-panel'), document.getElementById('apendice-tab'));
+registerPainel(legendPanel, legendToggle);
+
 legendToggle.addEventListener('click', function () {
 
     legendPanel.classList.toggle('open');
@@ -1435,6 +1566,7 @@ legendToggle.addEventListener('click', function () {
 
         legendToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
         legendToggle.title = 'Ocultar legenda';
+        bringPainelToFront(legendPanel, legendToggle);
 
     } else {
 
@@ -1443,7 +1575,7 @@ legendToggle.addEventListener('click', function () {
 
     }
 
-}); 
+});
 
 
 // ========================================
