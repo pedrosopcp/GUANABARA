@@ -439,17 +439,17 @@ html, body {
 
 .header {
     position: fixed;
-    top: 220;
+    top: 2;
     left: 0;
     width: 100%;
-    height: 70px;
+    height: 60px;
     background: #04456b;
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: Bahnschrift;
-    font-size: 11px;
+    font-size: 12px;
     z-index: 9999;
     font-weight: bold;
     text-align: center;
@@ -458,15 +458,15 @@ html, body {
 
 #map {
     position: absolute;
-    top: 70px;
+    top: 60px;
     left: 0;
     width: 100%;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 60px);
 }
 .logo-link {
     position: fixed;
-    bottom: 10px;
-    left: 10px;
+    bottom: 25px;
+    right: 10px;
     z-index: 9999;
 }
 
@@ -654,8 +654,9 @@ html, body {
 #apendice-tab {
     position: fixed;
     bottom: 0;
-    right: 35%; /* <-- ajuste este valor para mover o botão lateralmente */
-    width: 120px;
+    left: 10px
+    ; /* <-- ajuste este valor para mover o botão lateralmente */
+    width: 100px;
     height: 55px;
     background: #04456b;
     color: white;
@@ -673,13 +674,13 @@ html, body {
 }
 
 #apendice-tab i {
-    font-size: 18px;
+    font-size: 10px;
 }
 
 #apendice-tab::after {
     content: "APÊNDICE";
     font-family: Arial, sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     align-items: center;
     justify-content: center;
@@ -875,8 +876,8 @@ html, body {
      ABA DO APÊNDICE (PAINEL SANEAMENTO)
      ================================ -->
 
-<div id="apendice-tab" title="Mostrar apêndice" onclick="toggleApendice()">
-    <i class="fas fa-file-alt"></i>
+<div id="apendice-tab"  onclick="toggleApendice()">
+
 </div>
 
 <div id="apendice-panel">
